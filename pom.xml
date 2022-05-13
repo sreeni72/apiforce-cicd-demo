@@ -32,8 +32,9 @@
 					<cloudHubDeployment>
 						<objectStoreV2>true</objectStoreV2>
 						<muleVersion>${app.runtime}</muleVersion>
-						<username>${anypointUsername}</username>
-						<password>${anypointPassword}</password>
+						<connectedAppGrantType>client_credentials</connectedAppGrantType>
+						<connectedAppClientId>${connectedAppClientId}</connectedAppClientId>
+						<connectedAppClientSecret>${connectedAppClientSecret}</connectedAppClientSecret>
 						<applicationName>${project.artifactId}-v1-${anypointEnvironment}</applicationName>
 						<businessGroup>${businessgroup}</businessGroup>
 						<workers>${noOfWorkers}</workers>
