@@ -57,3 +57,38 @@ jobs:
           name: ${{env.artifactName}}
           path: ${{ github.workspace }}/target/*mule-application*.jar
           
+  deploy:
+      needs: build
+      runs-on: ubuntu-latest
+      steps:
+
+      - name: Checkout Repository Branch
+        uses: actions/checkout@v2
+
+      - name: Check if something is cached    
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Download artifact from artifactory
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{env.artifactName}}
+
+      - name: Deploy to Cloudhub
+        run: |
+          artifactName=$(ls *.jar | head -1)
+          mvn deploy -DmuleDeploy -e \
+            -DanypointEnvironment=${{env.anypointEnvironment}} \
+            -DpropertiesEnvironment=${{env.propertiesEnvironment}} \
+            -DanypointUsername=${{ env.anypointUsername }} \
+            -DanypointPassword=${{ env.anypointPassword }} \
+            -Dbusinessgroup=${{ env.businessgroup }} \
+            -DvaultKey=${{env.vaultKey}} \
+            -Dregion=${{env.region}} \
+            -DnoOfWorkers=${{env.noOfWorkers}} \
+            -DworkerType=${{env.workerType}} \
+            -DskipTests
