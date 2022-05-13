@@ -10,8 +10,8 @@ on:
 
 env:
   applicationName: 'apiforce-cicd-demo-v1-dev'
-  anypointUsername: apiforce
-  anypointPassword: 3tjnJ#neQibH!B
+  connectedAppClientId: 53b06ed4736d4b11a46d4587733f3a8c
+  connectedAppClientSecret: 69787BB89F7b4265BF6Dd814B2B10c56
   businessgroup: mboss
   artifactName: 'apiforce-cicd-demo-v1-dev'
   anypointEnvironment: 'DEV'
@@ -84,8 +84,8 @@ jobs:
           mvn deploy -DmuleDeploy -e \
             -DanypointEnvironment=${{env.anypointEnvironment}} \
             -DpropertiesEnvironment=${{env.propertiesEnvironment}} \
-            -DanypointUsername=${{ env.anypointUsername }} \
-            -DanypointPassword=${{ env.anypointPassword }} \
+            -DconnectedAppClientId=${{ env.connectedAppClientId }} \
+            -DconnectedAppClientSecret=${{ env.connectedAppClientSecret }} \
             -Dbusinessgroup=${{ env.businessgroup }} \
             -DvaultKey=${{env.vaultKey}} \
             -Dregion=${{env.region}} \
