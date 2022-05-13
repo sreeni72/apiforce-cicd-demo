@@ -10,8 +10,8 @@ on:
 
 env:
   applicationName: 'apiforce-cicd-demo-v1-dev'
-  connectedAppClientId: ${{secrets.connectedAppClientId}}
-  connectedAppClientSecret: ${{secrets.connectedAppClientSecret}}
+  connectedAppClientId: ${{secrets.CONNECTEDAPPCLIENTID}}
+  connectedAppClientSecret: ${{secrets.CONNECTEDAPPCLIENTSECRET}}
   businessgroup: mboss
   artifactName: 'apiforce-cicd-demo-v1-dev'
   anypointEnvironment: 'DEV'
