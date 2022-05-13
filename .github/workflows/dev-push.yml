@@ -65,14 +65,6 @@ jobs:
       - name: Checkout Repository Branch
         uses: actions/checkout@v2
 
-      - name: Check if something is cached    
-        uses: actions/cache@v1
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
       - name: Download artifact from artifactory
         uses: actions/download-artifact@v2
         with:
@@ -81,7 +73,7 @@ jobs:
       - name: Deploy to Cloudhub
         run: |
           artifactName=$(ls *.jar | head -1)
-          mvn deploy -DmuleDeploy -e \
+          mvn org.mule.tools.maven:mule-maven-plugin:deploy -Dpackaging=Jar -Dmule.artifact=$(ls *.jar | head -1) \
             -DanypointEnvironment=${{env.anypointEnvironment}} \
             -DpropertiesEnvironment=${{env.propertiesEnvironment}} \
             -DconnectedAppClientId=${{ env.connectedAppClientId }} \
