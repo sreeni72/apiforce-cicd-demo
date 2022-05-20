@@ -27,8 +27,8 @@
 mvn deploy -DskipTests -DmuleDeploy -e \
   -DanypointEnvironment='DEV' \
   -DpropertiesEnvironment='dev' \
-  -Dbusinessgroup='Business Systems' \
-  -DanypointUsername='aoberrauter' \
+  -Dbusinessgroup='Demo' \
+  -DanypointUsername='demo' \
   -DanypointPassword='xxx' \
   -DvaultKey='' \
   -Dregion='eu-central-1' \
@@ -52,7 +52,7 @@ env:
   anypointUsername: aoberrauter-internal
   anypointPassword: xnaeSiY22CWAE5AH
   businessgroup: best-practice
-  artifactName: 'as-mulesoft-xl-services-api-dev'
+  artifactName: 'apiforce-cicd-demo'
   anypointEnvironment: 'DEV'
   propertiesEnvironment: 'dev'
   workerType: MICRO
