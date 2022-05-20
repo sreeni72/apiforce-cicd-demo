@@ -1,0 +1,141 @@
+//POM Configuration
+
+<cloudHubDeployment>
+    <objectStoreV2>true</objectStoreV2>
+    <muleVersion>${app.runtime}</muleVersion>
+    <username>${anypointUsername}</username>
+    <password>${anypointPassword}</password> 
+    <applicationName>${project.artifactId}-v1-${anypointEnvironment}</applicationName>
+    <businessGroup>${businessgroup}</businessGroup>
+    <workers>${noOfWorkers}</workers>
+    <workerType>${workerType}</workerType>
+    <region>${region}</region>
+    <environment>${anypointEnvironment}</environment>
+    <deploymentTimeout>2000000</deploymentTimeout>
+    <properties>
+        <anypoint.platform.client_id>${platformClientId}</anypoint.platform.client_id>
+        <anypoint.platform.client_secret>${platformClientSecret}</anypoint.platform.client_secret>
+        <anypoint.platform.base_uri>${anypointBaseUri}</anypoint.platform.base_uri>
+        <anypoint.platform.analytics_base_uri>${anypointBaseUriAnalytics}</anypoint.platform.analytics_base_uri>
+        <mule.env>${propertiesEnvironment}</mule.env>
+        <mule.vault.key>${vaultKey}</mule.vault.key>
+    </properties>
+</cloudHubDeployment>
+
+//Deployment Command
+
+mvn deploy -DskipTests -DmuleDeploy -e \
+  -DanypointEnvironment='DEV' \
+  -DpropertiesEnvironment='dev' \
+  -Dbusinessgroup='Business Systems' \
+  -DanypointUsername='aoberrauter' \
+  -DanypointPassword='xxx' \
+  -DvaultKey='' \
+  -Dregion='eu-central-1' \
+  -DnoOfWorkers='1' \
+  -DworkerType='MICRO' \
+  -DanypointBaseUri='https://eu1.anypoint.mulesoft.com' \
+  -DanypointBaseUriAnalytics='https://analytics-ingest.eu1.anypoint.mulesoft.com/' \
+  -DconnectedAppClientId='appid' \
+  -DconnectedAppClientSecret='appsecret' \
+  -DskipTests
+
+//Gitaction YAML
+
+name: Build and Deploy to Cloudhub on push to Master
+    on:
+    push:
+        branches: [ master ]
+ 
+env:
+  applicationName: 'lemonade-exp-api'
+  anypointUsername: aoberrauter-internal
+  anypointPassword: xnaeSiY22CWAE5AH
+  businessgroup: best-practice
+  artifactName: 'as-mulesoft-xl-services-api-dev'
+  anypointEnvironment: 'DEV'
+  propertiesEnvironment: 'dev'
+  workerType: MICRO
+  noOfWorkers: 1
+  region: eu-central-1
+  vaultKey: AndyOberVaultKey
+  platformClientId: xxx
+  platformClientSecret: xxx
+  anypointBaseUri: 'https://eu1.anypoint.mulesoft.com/'
+  anypointBaseUriAnalytics: 'https://analytics-ingest.eu1.anypoint.mulesoft.com/'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository branch
+        uses: actions/checkout@v2
+      
+      - name: Check if something is cached
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-mvn-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-mvn-
+            
+      - name: Inject variables to pom
+        uses: rlespinasse/github-slug-action@v3.x
+ 
+      - name: Setup up JDK 1.8
+        uses: actions/setup-java@v1
+        with: 
+          java-version: 1.8
+ 
+      - name: Print Settings
+        run: mvn help:effective-settings
+ 
+      - name: Build Mule app with Maven
+        run:
+          mvn -B package --file pom.xml -DskipTests
+ 
+      - name: Upload artifact to Git-Actions artifactory
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{env.artifactName}}
+          path: ${{ github.workspace }}/target/*mule-application*.jar
+          
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    
+    - name: Checkout Repository Branch
+      uses: actions/checkout@v2
+      
+    - name: Check if something is cached    
+      uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+          
+    - name: Download artifact from artifactory
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{env.artifactName}}
+        
+    - name: Deploy to Cloudhub
+      run: |
+        artifactName=$(ls *.jar | head -1)
+        mvn deploy -DmuleDeploy -e \
+          -DanypointEnvironment=${{env.anypointEnvironment}} \
+          -DpropertiesEnvironment=${{env.propertiesEnvironment}} \
+          -DanypointUsername=${{ env.anypointUsername }} \
+          -DanypointPassword=${{ env.anypointPassword }} \
+          -Dbusinessgroup=${{ env.businessgroup }} \
+          -DvaultKey=${{env.vaultKey}} \
+          -Dregion=${{env.region}} \
+          -DnoOfWorkers=${{env.noOfWorkers}} \
+          -DworkerType=${{env.workerType}} \
+          -DanypointBaseUri=${{env.anypointBaseUri}} \
+          -DanypointBaseUriAnalytics=${{env.anypointBaseUriAnalytics}} \
+          -DplatformClientId=${{env.platformClientId}} \
+          -DplatformClientSecret=${{env.platformClientSecret}} \
+          -DskipTests
